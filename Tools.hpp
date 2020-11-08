@@ -15,6 +15,9 @@ class PGM{
         int CheckNeibors(vector <int> &indexed, int figure_index, queue<vector<int>> &myQueue);
         void CheckLocalNeibors( int i, int j, int figure_index, queue<vector<int>> &myQueue);
         void GetMaxMin();              // Escribe Max y Min en Figures
+         // Orientacion 3 puntos
+        int PGM::get_orientation(vector <int> p1, vector <int> p2, vector <int> p3); 
+
     public:
         int max_scale = 0;
         PGM(string filename);

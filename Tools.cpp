@@ -260,3 +260,19 @@ int PGM::CheckNeibors(vector <int> &indexed, int figure_id, queue<vector<int>> &
     }
     return neibors;
 }
+
+int PGM::get_orientation(vector <int> p1, vector <int> p2, vector <int> p3){
+    double tol   = 0.0000000001;
+    double sigma = (p3[0] - p2[0])*(p2[1] - p1[1]);
+    double tau   = (p2[0] - p1[0])*(p3[1] - p2[1]);
+    
+    if (fabs(sigma - tau) < tol){// [0] colineales
+        return 0;
+    }
+    else if (sigma - tau > 0){   // [1] Horario
+        return 1;
+    }
+    else{                        // [2] Antihorario
+        return 2;
+    }
+}
