@@ -62,7 +62,7 @@ void PGM::WritePGM(string filename) {
     // Escribe valores
     for (int i = 0; i < rows; i++){
         for (int j = 0; j < cols; j++){
-            file << Figures[i][j] << endl;
+            file << Image[i][j] << endl;
         }
     }
     file.close();
@@ -165,6 +165,7 @@ void PGM::GetConvexSet(){
     } // EndFor i
     position.clear();
     FindSet.clear();
+    convex = Figures.size();
 }
 
 void PGM::PrintFigures(){
@@ -350,6 +351,9 @@ void PGM::ConvexHull_Single(int id){
     for (int i = 0; i < Hull.size(); i++){
         Figures[Hull[i][0]][Hull[i][1]] = max_scale;  
     }
+
+    lines(Hull);
+
     cout << "* ***** F i g u r a ["   << id << "] ***** *" << endl;
     cout << "Tamaño de Envolvente : " << Hull.size()<< endl;
     
@@ -357,8 +361,8 @@ void PGM::ConvexHull_Single(int id){
         cout<< "Punto: " << "["<<Hull[i][0] << "]" << "["<< Hull[i][1] << "] ";
         if (i > 0 && (i+1)%4 == 0) cout << endl;
     }
-
     cout << endl;
+    
     Hull.clear();
 }
 
@@ -421,6 +425,10 @@ void PGM::ConvexHull_Full(){
     for (int i = 0; i < Hull.size(); i++){
         Figures[Hull[i][0]][Hull[i][1]] = max_scale;  
     }
+    
+    // Dibujo líneas
+    lines(Hull);
+
     cout << "* ***** F i g u r a ***** *" << endl;
     cout << "Tamaño de Envolvente : " << Hull.size()<< endl;
     
@@ -431,5 +439,80 @@ void PGM::ConvexHull_Full(){
 
     cout << endl;
     Hull.clear();
+
+}
+
+void PGM::lines(vector<vector<int>> &Hull) {
+    int x_1 = Hull[0][0];
+    int y_1 = Hull[0][1];
+    int x_2 = Hull[1][0];
+    int y_2 = Hull[1][1];
+    float m = 0;
+
+    for (int i = 0; i < Hull.size()-1; i++){
+        x_1 = Hull[i][0];
+        y_1 = Hull[i][1];
+        x_2 = Hull[i+1][0];
+        y_2 = Hull[i+1][1];
+        if (x_1 == x_2){
+            if (y_1 < y_2) {        
+                for (int j = y_1; j < y_2; j++){
+                    Image[x_1][j] = max_scale/2;
+                }
+            }
+            if (y_1 > y_2) {        
+                for (int j = y_2; j < y_1; j--){
+                    Image[x_1][j] = max_scale/2;
+                }
+            }
+        }
+        else{
+            m = (float) (y_2-y_1)/(x_2-x_1);   
+            if (x_2 > x_1){
+                for (int j = x_1+1; j <= x_2; j++){
+                    y_2 = m * (float) ( j - x_1) + y_1;
+                    Image[j][y_2] = max_scale/2;
+                }
+            }
+            if (x_2 < x_1){
+                for (int j = x_2+1; j <= x_1; j++){
+                    y_2 = m * (float) ( j - x_1) + y_1;
+                    Image[j][y_2] = max_scale/2;
+                }
+            }
+        }
+    }
+    //ultimo caso primer y último punto
+    x_1 = Hull[0][0];
+    y_1 = Hull[0][1];
+    x_2 = Hull[Hull.size()-1][0];
+    y_2 = Hull[Hull.size()-1][1];
+    if (x_1 == x_2){
+        if (y_1 < y_2) {        
+            for (int j = y_1; j < y_2; j++){
+                Image[x_1][j] = max_scale/5;
+            }
+        }
+        if (y_1 > y_2) {        
+            for (int j = y_2; j < y_1; j--){
+                Image[x_1][j] = max_scale/2;
+            }
+        }
+    }
+    else{
+        m = (float) (y_2-y_1)/(x_2-x_1);   
+        if (x_2 > x_1){
+            for (int j = x_1+1; j <= x_2; j++){
+                y_2 = m * (float) ( j - x_1) + y_1;
+                Image[j][y_2] = max_scale/5;
+            }
+        }
+        if (x_2 < x_1){
+            for (int j = x_2+1; j <= x_1; j++){
+                y_2 = m * (float) ( j - x_1) + y_1;
+                Image[j][y_2] = max_scale/2;
+            }
+        }
+    }
 
 }
