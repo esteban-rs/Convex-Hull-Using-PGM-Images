@@ -100,7 +100,7 @@ void PGM::GetMaxMin(){
 }
 
 void PGM::WritePGM_MM(string filename) {
-    GetMaxMin();
+    //GetMaxMin();
     ofstream file(filename);
     // Comienza escritura
     file << "P2"<<endl;
@@ -261,18 +261,175 @@ int PGM::CheckNeibors(vector <int> &indexed, int figure_id, queue<vector<int>> &
     return neibors;
 }
 
-int PGM::get_orientation(vector <int> p1, vector <int> p2, vector <int> p3){
-    double tol   = 0.0000000001;
-    double sigma = (p3[0] - p2[0])*(p2[1] - p1[1]);
-    double tau   = (p2[0] - p1[0])*(p3[1] - p2[1]);
-    
-    if (fabs(sigma - tau) < tol){// [0] colineales
-        return 0;
-    }
-    else if (sigma - tau > 0){   // [1] Horario
+int PGM::distance_compare(vector <int> &p1, vector <int> &p2,vector <int> &p3){
+    // Regresa como resultado si p3 está más lejos de p2
+    double value1 = sqrt((p1[0]-p2[0])*(p1[0]-p2[0])+(p1[1]-p2[1])*(p1[1]-p2[1]));
+    double value2 = sqrt((p1[0]-p3[0])*(p1[0]-p3[0])+(p1[1]-p3[1])*(p1[1]-p3[1]));
+    if (value1 < value2){
         return 1;
     }
-    else{                        // [2] Antihorario
-        return 2;
+    else{
+        return 0;
     }
+}
+
+int PGM::get_orientation(vector <int> &p1, vector <int> &p2, vector <int> &p3){
+    // Regresa la orientacion de los puntos dados
+    int sigma = (p3[0] - p2[0])*(p2[1] - p1[1]);
+    int tau   = (p2[0] - p1[0])*(p3[1] - p2[1]);
+    
+    if ((sigma - tau) == 0){   
+        return 0;             // [0] Colineales
+    }
+    else if (sigma - tau > 0){ 
+        return 1;             // [1] Horario
+    }
+    else{                      
+        return 2;             // [2] Antihorario
+    }
+}
+
+void PGM::ConvexHull_Single(int id){
+    // Recibe índice de figura previamente calculada en GetConvexSet()
+    
+    // Termino si tengo línea o punto como figura
+    if (FiguresID[id-1][1] < 3){
+        cout << "No Convex Hull Found."<< endl;
+        return;
+    }
+
+    vector< vector <int>> figure; // Puntos de Figura
+    vector<int> pixel;            // Punto temporal
+    pixel.assign(2,0);
+
+    // Agrego a lista si tiene etiqueta id
+    for (int i = 0; i < rows; i++){
+        for (int j = 0; j < cols; j++){
+            if (Figures[i][j] == id){
+                pixel[0] = i;
+                pixel[1] = j;
+                figure.push_back(pixel);
+            }
+        }
+    }
+    /* Por la forma en la que se recorrió la matriz, 
+    los puntos en figure están ordenados. */
+
+    // Jarvis March
+    vector< vector <int>> Hull; // Lista para puntos
+    
+    int p           = 0;  // Indice actual
+    int q           = 0;  // Actualizacion
+    int orientation = 2;
+
+    while (true){
+        // Agrego punto a Envolvente
+        Hull.push_back(figure[p]);
+
+        // Comienzo busqueda
+        q = (p + 1)%figure.size();
+
+        for (int i = 0; i < figure.size(); i++){
+            orientation = get_orientation(figure[p], figure[i], figure[q]);
+            if (orientation == 2){
+                q = i;              // Actualizo si orientacion es antihoraria
+            }
+            if (orientation == 0){
+                if (distance_compare(figure[p], figure[i], figure[q]) == 0){
+                    q = i;          // Actualizo si son colineales y distancia es mayor
+                }
+            }
+        }
+        p = q;                      // Actualizo punto inicial
+        if (p == 0) break;          // Termino si regreso a primer punto
+    }
+
+    figure.clear();
+
+    // Cambio color de pixeles en Figures
+    for (int i = 0; i < Hull.size(); i++){
+        Figures[Hull[i][0]][Hull[i][1]] = max_scale;  
+    }
+    cout << "* ***** F i g u r a ["   << id << "] ***** *" << endl;
+    cout << "Tamaño de Envolvente : " << Hull.size()<< endl;
+    
+    for (int i = 0; i < Hull.size(); i++){
+        cout<< "Punto: " << "["<<Hull[i][0] << "]" << "["<< Hull[i][1] << "] ";
+        if (i > 0 && (i+1)%4 == 0) cout << endl;
+    }
+
+    cout << endl;
+    Hull.clear();
+}
+
+void PGM::ConvexHull_Figures(){
+    // Obtiene todas las envolventes convexas de todas las figuras
+    for (int i = 1; i <= FiguresID.size(); i++){
+        ConvexHull_Single(i);
+    }
+}
+
+void PGM::ConvexHull_Full(){
+    vector< vector <int>> figure; // Puntos de Figura
+    vector<int> pixel;            // Punto temporal
+    pixel.assign(2,0);
+
+    // Agrego a lista si tiene etiqueta id
+    for (int i = 0; i < rows; i++){
+        for (int j = 0; j < cols; j++){
+            if (Image[i][j] == max_scale){
+                pixel[0] = i;
+                pixel[1] = j;
+                figure.push_back(pixel);
+            }
+        }
+    }
+    /* Por la forma en la que se recorrió la matriz, 
+    los puntos en figure están ordenados. */
+
+    // Jarvis March
+    vector< vector <int>> Hull; // Lista para puntos
+    
+    int p           = 0;  // Indice actual
+    int q           = 0;  // Actualizacion
+    int orientation = 2;
+
+    while (true){
+        // Agrego punto a Envolvente
+        Hull.push_back(figure[p]);
+
+        // Comienzo busqueda
+        q = (p + 1)%figure.size();
+
+        for (int i = 0; i < figure.size(); i++){
+            orientation = get_orientation(figure[p], figure[i], figure[q]);
+            if (orientation == 2){
+                q = i;              // Actualizo si orientacion es antihoraria
+            }
+            if (orientation == 0){
+                if (distance_compare(figure[p], figure[i], figure[q]) == 0){
+                    q = i;          // Actualizo si son colineales y distancia es mayor
+                }
+            }
+        }
+        p = q;                      // Actualizo punto inicial
+        if (p == 0) break;          // Termino si regreso a primer punto
+    }
+    figure.clear();
+
+    // Cambio color de pixeles en Figures
+    for (int i = 0; i < Hull.size(); i++){
+        Figures[Hull[i][0]][Hull[i][1]] = max_scale;  
+    }
+    cout << "* ***** F i g u r a ***** *" << endl;
+    cout << "Tamaño de Envolvente : " << Hull.size()<< endl;
+    
+    for (int i = 0; i < Hull.size(); i++){
+        cout<< "Punto: " << "["<<Hull[i][0] << "]" << "["<< Hull[i][1] << "] ";
+        if (i > 0 && (i+1)%4 == 0) cout << endl;
+    }
+
+    cout << endl;
+    Hull.clear();
+
 }

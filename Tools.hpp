@@ -12,18 +12,28 @@ class PGM{
         vector<vector< int>> FiguresID;// Id y tamaño
         
         void FilteredPGM();            // Filtra pixeles grises
+        void GetMaxMin();              // Escribe Max y Min en Figures
+
+        // Conjuntos Conexos
         int CheckNeibors(vector <int> &indexed, int figure_index, queue<vector<int>> &myQueue);
         void CheckLocalNeibors( int i, int j, int figure_index, queue<vector<int>> &myQueue);
-        void GetMaxMin();              // Escribe Max y Min en Figures
-         // Orientacion 3 puntos
-        int PGM::get_orientation(vector <int> p1, vector <int> p2, vector <int> p3); 
+        // Envolvente Conexa
+        int distance_compare(vector <int> &p1, vector <int> &p2,vector <int> &p3);
+        int get_orientation(vector <int> &p1, vector <int> &p2, vector <int> &p3); 
 
     public:
         int max_scale = 0;
+
         PGM(string filename);
+        // Conjuntos Conexos
         void GetConvexSet();
         void PrintFigures();
-        void WritePGM(string filename); // Escribe imagen original
+        // Envolvente Conexa
+        void ConvexHull_Single(int id);
+        void ConvexHull_Figures();
+        void ConvexHull_Full();
+
+        void WritePGM(string filename);   // Escribe imagen original
         void WritePGM_MM(string filename);// Escribe Max y Min
 };
 

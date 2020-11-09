@@ -14,10 +14,13 @@ int main(int argc, char const *argv[]){
     clock_t start = clock();
     PGM Image(name);
     Image.GetConvexSet();
-    Image.PrintFigures();
+    Image.ConvexHull_Full();
+    //Image.ConvexHull_Figures();
     Image.WritePGM_MM("Out/result_" + name1);
+    
     clock_t end = clock();
     double cpu_time_used = ((double)(end - start))/CLOCKS_PER_SEC; 
-    printf ("Tiempo de Ejecución : %lf segundos.\n",cpu_time_used);
+    printf("Tiempo de Ejecución : %lf segundos.\n",cpu_time_used);
+
     return 0;
 }
