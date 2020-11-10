@@ -431,8 +431,9 @@ void PGM::ConvexHull_Full(){
 }
 
 void PGM::PaintNeibors(int i, int j){
+    // Reviso cuatro Vecinos
     int color = max_scale/2;
-
+    
     // Reviso todos los casos
     if (i >= 0 && j -1 >= 0){
         Image[i][j-1] = color;
@@ -440,23 +441,11 @@ void PGM::PaintNeibors(int i, int j){
     if (i -1 >= 0 && j >= 0){
         Image[i-1][j] = color;
     }
-    if (i - 1 >= 0 && j - 1 >= 0){
-        Image[i-1][j-1] = color;
-    }
-    if (i - 1 >= 0 && j + 1 < cols){
-            Image[i-1][j-1] = color;
-    }
-    if (i + 1 < rows && j - 1 >= 0){
-        Image[i+1][j-1] = color;
-    }
     if (i >= 0 && j + 1 < cols){
         Image[i][j+1] = color;
     }
     if (i + 1 < rows && j >= 0){
         Image[i+1][j] = color;
-    }
-    if (i + 1 < rows && j + 1 < cols){
-        Image[i+1][j+1] = color;
     }
 }
 
@@ -466,13 +455,14 @@ void PGM::lines(vector<vector<int>> &Hull) {
     int y_1 = 0;
     int x_2 = 1;
     int y_2 = 1;
-    float m = 0;
+    
+    float m   = 0;
     int pivot = 0;
 
     // Dibujo segmentos p1-p2, p2-p3, ...
     for (int i = 0; i < Hull.size(); i++){
         if (i != Hull.size()-1){
-             x_1 = Hull[i][0];
+            x_1 = Hull[i][0];
             y_1 = Hull[i][1];
             x_2 = Hull[i+1][0];
             y_2 = Hull[i+1][1];
@@ -495,7 +485,7 @@ void PGM::lines(vector<vector<int>> &Hull) {
             }
             // y_1 > y_2
 		    else {
-                for (int y = y_2; y < y_1; y++){
+                for (int y = y_2; y <= y_1; y++){
                     Image[x_1][y] = max_scale/2;
                     PaintNeibors(x_1,y);
                 }
@@ -515,7 +505,7 @@ void PGM::lines(vector<vector<int>> &Hull) {
                     }
                 }
                 else {
-                    for (int x = x_2; x < x_1; x++){
+                    for (int x = x_2; x <= x_1; x++){
                         m     = (float) (y_2 - y_1)/(x_2 - x_1);
                         pivot = (int) (m*(x-x_1) + y_1);
                         
@@ -526,8 +516,6 @@ void PGM::lines(vector<vector<int>> &Hull) {
 		    }
 		    // |x_2 - x_1 | <= |y_2 - y_1 |
             else {
-                int yint;
-                double yi;
                 if(y_1 < y_2){
                     for (int y = y_1; y < y_2; y++){
                         m     = (float) (x_2 - x_1)/(y_2 - y_1);
@@ -550,74 +538,4 @@ void PGM::lines(vector<vector<int>> &Hull) {
             }
 	    }
     }
-
-    //Revisa Primer y último punto de Hull
-    x_1 = Hull[0][0];
-    y_1 = Hull[0][1];
-    x_2 = Hull[Hull.size()-1][0];
-    y_2 = Hull[Hull.size()-1][1];
-
-    // Pendiente indefinida
-    if (x_1 == x_2){
-        if(y_1 < y_2){
-            for (int y = y_1; y <= y_2; y++){
-                Image[x_1][y] = max_scale/2;
-                PaintNeibors(x_1,y);
-            }
-        }
-        // y_1 > y_2
-	    else {
-            for (int y = y_2; y < y_1; y++){
-                Image[x_1][y] = max_scale/2;
-                PaintNeibors(x_1,y);
-            }
-	    }		
-	}
-	else {
-	    // |x_2 - x_1 | > |y_2 - y_1 |
-	    if(abs(x_2 - x_1) > abs(y_2 - y_1)){
-            if(x_1 < x_2){
-                for (int x = x_1; x <= x_2; x++){
-                    m     = (float) (y_2 - y_1)/(x_2 - x_1);
-                    pivot = (int) (m*(x-x_1) + y_1);
-                        
-                    Image[x][pivot] = max_scale/2;
-                    PaintNeibors(x,pivot);
-                }
-            }
-            else {
-                for (int x = x_2; x < x_1; x++){
-                    m     = (float) (y_2 - y_1)/(x_2 - x_1);
-                    pivot = (int) (m*(x-x_1) + y_1);
-                        
-                    Image[x][pivot] = max_scale/2;
-                    PaintNeibors(x,pivot);
-                }
-            }	
-	    }
-	    // |x_2 - x_1 | <= |y_2 - y_1 |
-        else {
-            int yint;
-            double yi;
-            if(y_1 < y_2){
-                for (int y = y_1; y < y_2; y++){
-                    m     = (float) (x_2 - x_1)/(y_2 - y_1);
-                    pivot = (int) (m*(y-y_1)+x_1);
-
-                    Image[pivot][y]=max_scale/2;
-                    PaintNeibors(pivot,y);
-                }
-            }
-            // y_1 >= y_2
-            else {
-                for (int y = y_2; y < y_1; y++){
-                m     = (float) (x_2 - x_1)/(y_2 - y_1);
-                pivot = (int) (m*(y-y_1)+x_1);
-
-                Image[pivot][y]=max_scale/2;
-                PaintNeibors(pivot,y);
-                }
-            }		            
-        }
-	}
 }
