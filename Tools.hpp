@@ -20,6 +20,9 @@ class PGM{
         // Envolvente Convexa
         int distance_compare(vector <int> &p1, vector <int> &p2,vector <int> &p3);
         int get_orientation(vector <int> &p1, vector <int> &p2, vector <int> &p3); 
+        void PaintNeibors(int i, int j);
+        void drawline(int x_1, int y_1, int x_2, int y_2);
+
         void lines(vector<vector<int>> &Hull);
     public:
         int convex    = 0;

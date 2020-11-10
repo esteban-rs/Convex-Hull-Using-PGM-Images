@@ -120,7 +120,7 @@ void PGM::WritePGM_MM(string filename) {
 }
 
 void PGM::GetConvexSet(){
-    // Asigno memoria a matrix figuras
+    // Asigno memoria a matrix Image
     Figures.assign(rows, vector<int> (cols,0));
 
     queue<vector<int>> MyQueue;// Cola para pixeles de figura
@@ -344,13 +344,7 @@ void PGM::ConvexHull_Single(int id){
         p = q;                      // Actualizo punto inicial
         if (p == 0) break;          // Termino si regreso a primer punto
     }
-
     figure.clear();
-
-    // Cambio color de pixeles en Figures
-    for (int i = 0; i < Hull.size(); i++){
-        Figures[Hull[i][0]][Hull[i][1]] = max_scale;  
-    }
 
     lines(Hull);
 
@@ -421,11 +415,6 @@ void PGM::ConvexHull_Full(){
     }
     figure.clear();
 
-    // Cambio color de pixeles en Figures
-    for (int i = 0; i < Hull.size(); i++){
-        Figures[Hull[i][0]][Hull[i][1]] = max_scale;  
-    }
-    
     // Dibujo líneas
     lines(Hull);
 
@@ -436,83 +425,199 @@ void PGM::ConvexHull_Full(){
         cout<< "Punto: " << "["<<Hull[i][0] << "]" << "["<< Hull[i][1] << "] ";
         if (i > 0 && (i+1)%4 == 0) cout << endl;
     }
-
     cout << endl;
-    Hull.clear();
 
+    Hull.clear();
+}
+
+void PGM::PaintNeibors(int i, int j){
+    int color = max_scale/2;
+
+    // Reviso todos los casos
+    if (i >= 0 && j -1 >= 0){
+        Image[i][j-1] = color;
+    }
+    if (i -1 >= 0 && j >= 0){
+        Image[i-1][j] = color;
+    }
+    if (i - 1 >= 0 && j - 1 >= 0){
+        Image[i-1][j-1] = color;
+    }
+    if (i - 1 >= 0 && j + 1 < cols){
+            Image[i-1][j-1] = color;
+    }
+    if (i + 1 < rows && j - 1 >= 0){
+        Image[i+1][j-1] = color;
+    }
+    if (i >= 0 && j + 1 < cols){
+        Image[i][j+1] = color;
+    }
+    if (i + 1 < rows && j >= 0){
+        Image[i+1][j] = color;
+    }
+    if (i + 1 < rows && j + 1 < cols){
+        Image[i+1][j+1] = color;
+    }
 }
 
 void PGM::lines(vector<vector<int>> &Hull) {
-    int x_1 = Hull[0][0];
-    int y_1 = Hull[0][1];
-    int x_2 = Hull[1][0];
-    int y_2 = Hull[1][1];
+    // Guarda posición (x_1,y_1) y (x_2, y_2)
+    int x_1 = 0;
+    int y_1 = 0;
+    int x_2 = 1;
+    int y_2 = 1;
     float m = 0;
+    int pivot = 0;
 
-    for (int i = 0; i < Hull.size()-1; i++){
-        x_1 = Hull[i][0];
-        y_1 = Hull[i][1];
-        x_2 = Hull[i+1][0];
-        y_2 = Hull[i+1][1];
-        if (x_1 == x_2){
-            if (y_1 < y_2) {        
-                for (int j = y_1; j < y_2; j++){
-                    Image[x_1][j] = max_scale/2;
-                }
-            }
-            if (y_1 > y_2) {        
-                for (int j = y_2; j < y_1; j--){
-                    Image[x_1][j] = max_scale/2;
-                }
-            }
+    // Dibujo segmentos p1-p2, p2-p3, ...
+    for (int i = 0; i < Hull.size(); i++){
+        if (i != Hull.size()-1){
+             x_1 = Hull[i][0];
+            y_1 = Hull[i][1];
+            x_2 = Hull[i+1][0];
+            y_2 = Hull[i+1][1];
         }
-        else{
-            m = (float) (y_2-y_1)/(x_2-x_1);   
-            if (x_2 > x_1){
-                for (int j = x_1+1; j <= x_2; j++){
-                    y_2 = m * (float) ( j - x_1) + y_1;
-                    Image[j][y_2] = max_scale/2;
-                }
-            }
-            if (x_2 < x_1){
-                for (int j = x_2+1; j <= x_1; j++){
-                    y_2 = m * (float) ( j - x_1) + y_1;
-                    Image[j][y_2] = max_scale/2;
-                }
-            }
+        else {
+            //Revisa Primer y último punto de Hull
+            x_1 = Hull[0][0];
+            y_1 = Hull[0][1];
+            x_2 = Hull[Hull.size()-1][0];
+            y_2 = Hull[Hull.size()-1][1];
         }
+
+        // Pendiente indefinida
+    	if (x_1 == x_2){
+            if(y_1 < y_2){
+                for (int y = y_1; y <= y_2; y++){
+                    Image[x_1][y] = max_scale/2;
+                    PaintNeibors(x_1,y);
+                }
+            }
+            // y_1 > y_2
+		    else {
+                for (int y = y_2; y < y_1; y++){
+                    Image[x_1][y] = max_scale/2;
+                    PaintNeibors(x_1,y);
+                }
+		    }		
+	    }
+        // Pendiente bien definida
+	    else {
+		    // |x_2 - x_1 | > |y_2 - y_1 |
+		    if(abs(x_2 - x_1) > abs(y_2 - y_1)){
+                if(x_1 < x_2){
+                    for (int x = x_1; x <= x_2; x++){
+                        m     = (float) (y_2 - y_1)/(x_2 - x_1);
+                        pivot = (int) (m*(x-x_1) + y_1);
+                        
+                        Image[x][pivot] = max_scale/2;
+                        PaintNeibors(x,pivot);
+                    }
+                }
+                else {
+                    for (int x = x_2; x < x_1; x++){
+                        m     = (float) (y_2 - y_1)/(x_2 - x_1);
+                        pivot = (int) (m*(x-x_1) + y_1);
+                        
+                        Image[x][pivot] = max_scale/2;
+                        PaintNeibors(x,pivot);
+                    }
+                }	
+		    }
+		    // |x_2 - x_1 | <= |y_2 - y_1 |
+            else {
+                int yint;
+                double yi;
+                if(y_1 < y_2){
+                    for (int y = y_1; y < y_2; y++){
+                        m     = (float) (x_2 - x_1)/(y_2 - y_1);
+                        pivot = (int) (m*(y-y_1)+x_1);
+
+                        Image[pivot][y]=max_scale/2;
+                        PaintNeibors(pivot,y);
+                    }
+                }
+                // y_1 >= y_2
+                else {
+                    for (int y = y_2; y < y_1; y++){
+                        m     = (float) (x_2 - x_1)/(y_2 - y_1);
+                        pivot = (int) (m*(y-y_1)+x_1);
+
+                        Image[pivot][y]=max_scale/2;
+                        PaintNeibors(pivot,y);
+                    }
+                }		            
+            }
+	    }
     }
-    //ultimo caso primer y último punto
+
+    //Revisa Primer y último punto de Hull
     x_1 = Hull[0][0];
     y_1 = Hull[0][1];
     x_2 = Hull[Hull.size()-1][0];
     y_2 = Hull[Hull.size()-1][1];
-    if (x_1 == x_2){
-        if (y_1 < y_2) {        
-            for (int j = y_1; j < y_2; j++){
-                Image[x_1][j] = max_scale/5;
-            }
-        }
-        if (y_1 > y_2) {        
-            for (int j = y_2; j < y_1; j--){
-                Image[x_1][j] = max_scale/2;
-            }
-        }
-    }
-    else{
-        m = (float) (y_2-y_1)/(x_2-x_1);   
-        if (x_2 > x_1){
-            for (int j = x_1+1; j <= x_2; j++){
-                y_2 = m * (float) ( j - x_1) + y_1;
-                Image[j][y_2] = max_scale/5;
-            }
-        }
-        if (x_2 < x_1){
-            for (int j = x_2+1; j <= x_1; j++){
-                y_2 = m * (float) ( j - x_1) + y_1;
-                Image[j][y_2] = max_scale/2;
-            }
-        }
-    }
 
+    // Pendiente indefinida
+    if (x_1 == x_2){
+        if(y_1 < y_2){
+            for (int y = y_1; y <= y_2; y++){
+                Image[x_1][y] = max_scale/2;
+                PaintNeibors(x_1,y);
+            }
+        }
+        // y_1 > y_2
+	    else {
+            for (int y = y_2; y < y_1; y++){
+                Image[x_1][y] = max_scale/2;
+                PaintNeibors(x_1,y);
+            }
+	    }		
+	}
+	else {
+	    // |x_2 - x_1 | > |y_2 - y_1 |
+	    if(abs(x_2 - x_1) > abs(y_2 - y_1)){
+            if(x_1 < x_2){
+                for (int x = x_1; x <= x_2; x++){
+                    m     = (float) (y_2 - y_1)/(x_2 - x_1);
+                    pivot = (int) (m*(x-x_1) + y_1);
+                        
+                    Image[x][pivot] = max_scale/2;
+                    PaintNeibors(x,pivot);
+                }
+            }
+            else {
+                for (int x = x_2; x < x_1; x++){
+                    m     = (float) (y_2 - y_1)/(x_2 - x_1);
+                    pivot = (int) (m*(x-x_1) + y_1);
+                        
+                    Image[x][pivot] = max_scale/2;
+                    PaintNeibors(x,pivot);
+                }
+            }	
+	    }
+	    // |x_2 - x_1 | <= |y_2 - y_1 |
+        else {
+            int yint;
+            double yi;
+            if(y_1 < y_2){
+                for (int y = y_1; y < y_2; y++){
+                    m     = (float) (x_2 - x_1)/(y_2 - y_1);
+                    pivot = (int) (m*(y-y_1)+x_1);
+
+                    Image[pivot][y]=max_scale/2;
+                    PaintNeibors(pivot,y);
+                }
+            }
+            // y_1 >= y_2
+            else {
+                for (int y = y_2; y < y_1; y++){
+                m     = (float) (x_2 - x_1)/(y_2 - y_1);
+                pivot = (int) (m*(y-y_1)+x_1);
+
+                Image[pivot][y]=max_scale/2;
+                PaintNeibors(pivot,y);
+                }
+            }		            
+        }
+	}
 }
