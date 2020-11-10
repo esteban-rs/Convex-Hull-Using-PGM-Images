@@ -3,7 +3,7 @@
 #include "Tools.hpp"
 
 int main(int argc, char const *argv[]){
-    if (argc == 1 or argc >2){
+    if (argc == 1 || argc > 2){
         cout << "Ingrese el nombre de un solo fichero. " << endl;
         exit(-1);
     }

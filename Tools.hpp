@@ -17,12 +17,11 @@ class PGM{
         // Conjuntos Conexos
         int CheckNeibors(vector <int> &indexed, int figure_index, queue<vector<int>> &myQueue);
         void CheckLocalNeibors( int i, int j, int figure_index, queue<vector<int>> &myQueue);
+        
         // Envolvente Convexa
         int distance_compare(vector <int> &p1, vector <int> &p2,vector <int> &p3);
         int get_orientation(vector <int> &p1, vector <int> &p2, vector <int> &p3); 
         void PaintNeibors(int i, int j);
-        void drawline(int x_1, int y_1, int x_2, int y_2);
-
         void lines(vector<vector<int>> &Hull);
     public:
         int convex    = 0;
@@ -32,7 +31,8 @@ class PGM{
         // Conjuntos Conexos
         void GetConvexSet();
         void PrintFigures();
-        // Envolvente Conexa
+
+        // Envolvente Convexa
         void ConvexHull_Single(int id);
         void ConvexHull_Figures();
         void ConvexHull_Full();

@@ -459,7 +459,7 @@ void PGM::lines(vector<vector<int>> &Hull) {
     float m   = 0;
     int pivot = 0;
 
-    // Dibujo segmentos p1-p2, p2-p3, ...
+    // Dibujo segmentos p1-p2, p2-p3, ..., pn-p1
     for (int i = 0; i < Hull.size(); i++){
         if (i != Hull.size()-1){
             x_1 = Hull[i][0];
