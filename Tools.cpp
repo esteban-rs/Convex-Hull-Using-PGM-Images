@@ -327,7 +327,7 @@ void PGM::ConvexHull_Single(int id){
         // Agrego punto a Envolvente
         Hull.push_back(figure[p]);
 
-        // Comienzo busqueda
+        // Comienzo busqueda en el siguiente punto
         q = (p + 1)%figure.size();
 
         for (int i = 0; i < figure.size(); i++){
@@ -399,7 +399,7 @@ void PGM::ConvexHull_Full(){
         // Agrego punto a Envolvente
         Hull.push_back(figure[p]);
 
-        // Comienzo busqueda
+        // Comienzo busqueda en el siguiente punto
         q = (p + 1)%figure.size();
 
         for (int i = 0; i < figure.size(); i++){
