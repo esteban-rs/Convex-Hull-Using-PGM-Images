@@ -10,6 +10,7 @@ PGM::PGM(string filename) {
     }
 
     string line;              // Variable local
+    string word;
     /* **** C o m i e n z a  l e c t u r a **** */                 
     getline(file, line);
     if (line.compare("P2") != 0){
@@ -22,10 +23,15 @@ PGM::PGM(string filename) {
     }
     /* *********** A l o c a c i o n ********** */                 
     stringstream ss(line);  // Obtengo dimensiones
-    getline(ss,line,' ');
-    rows = stoi(line);      
-    cols = stoi(line);
+    
+    getline(ss,word,' ');
+    cols = stoi(word); 
+    
+    getline(ss,word,' ');     
+    rows = stoi(word);
+
     Image.assign(rows, vector<int> (cols,0));
+    
     file >> max_scale;
     /* ******* L e e  C o n t e n i d o ******* */                 
     for (int i = 0; i < rows; i++){
@@ -56,7 +62,7 @@ void PGM::WritePGM(string filename) {
     // Comienza escritura
     file << "P2"<<endl;
     file << "# CREATED BY ESTEBANRS" << endl;
-    file << rows << " " << cols << endl;
+    file << cols << " " << rows << endl;
     file << max_scale << endl;
 
     // Escribe valores
