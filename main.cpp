@@ -38,7 +38,7 @@ int main(int argc, char const *argv[]){
         clock_t end = clock();
         double cpu_time_used = ((double)(end - start))/CLOCKS_PER_SEC; 
         printf("Tiempo de Ejecución : %lf segundos.\n",cpu_time_used);
-        Image.WritePGM("Out/result_" + name1);
+        Image.WritePGM("Out/result_" + to_string(id) + "_" + name1);
     }
 
     if (opcion == 1){
@@ -48,7 +48,7 @@ int main(int argc, char const *argv[]){
         clock_t end = clock();
         double cpu_time_used = ((double)(end - start))/CLOCKS_PER_SEC; 
         printf("Tiempo de Ejecución : %lf segundos.\n",cpu_time_used);
-        Image.WritePGM("Out/result_" + name1);
+        Image.WritePGM("Out/result_all_" + name1);
 
     }
     if (opcion == 2){
@@ -58,7 +58,7 @@ int main(int argc, char const *argv[]){
         clock_t end = clock();
         double cpu_time_used = ((double)(end - start))/CLOCKS_PER_SEC; 
         printf("Tiempo de Ejecución : %lf segundos.\n",cpu_time_used);
-        Image.WritePGM("Out/result_" + name1);
+        Image.WritePGM("Out/result_full_" + name1);
     }
     else{
         exit(0);
